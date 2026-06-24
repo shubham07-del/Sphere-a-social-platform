@@ -90,10 +90,9 @@ async function forgotPassword(req, res) {
                 message: "OTP sent to email successfully"
             });
         } catch (emailError) {
-            console.error("Gmail blocked the request, falling back to Dev OTP:", emailError.message);
-            res.status(200).json({ 
-                message: "Email blocked by server firewall. Using Dev Mode.",
-                devOtp: otp 
+            console.error("Email sending failed:", emailError.message);
+            res.status(500).json({ 
+                message: `Email Failed: ${emailError.message}` 
             });
         }
     } catch (error) {
