@@ -21,8 +21,9 @@ const sendOTPEmail = async (email, otp) => {
         // 2. Create the transporter inside the function using the resolved IPv4 address
         const transporter = nodemailer.createTransport({
             host: address,
-            port: 465,
-            secure: true,
+            port: 587,
+            secure: false, // Must be false for 587 (uses STARTTLS)
+            requireTLS: true,
             tls: {
                 servername: 'smtp.gmail.com', // Required so the SSL certificate doesn't fail on an IP address
             },
@@ -30,6 +31,9 @@ const sendOTPEmail = async (email, otp) => {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            connectionTimeout: 10000, // 10 seconds max wait
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
         });
         const mailOptions = {
             from: `"Antigravity Social" <${process.env.SMTP_USER}>`,
