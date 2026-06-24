@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a custom axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // adjust this if your backend is on a different port
+  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:3000/api', // Uses relative path in production, absolute path in development
 });
 
 // Add a request interceptor to automatically attach the token
