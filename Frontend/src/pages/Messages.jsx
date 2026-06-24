@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Info, Image as ImageIcon, Smile } from 'lucide-react';
+import { Send, Phone, Video, Info, Image as ImageIcon, Smile, ChevronLeft } from 'lucide-react';
 import Avatar from '../components/ui/Avatar';
 import api from '../api/axios';
 import { io } from 'socket.io-client';
@@ -79,9 +79,9 @@ const Messages = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] md:h-screen -mx-4 md:-mx-8">
+    <div className="flex h-[calc(100vh-64px-64px)] md:h-screen -mx-4 md:-mx-8 overflow-hidden relative">
       {/* Sidebar - Conversation List */}
-      <div className="w-full md:w-80 border-r border-border flex flex-col">
+      <div className={`w-full md:w-80 border-r border-border flex-col bg-dark ${activeChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-border">
           <h1 className="text-xl font-bold text-white">Messages</h1>
         </div>
@@ -106,7 +106,7 @@ const Messages = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="hidden md:flex flex-1 flex-col bg-dark/50">
+      <div className={`flex-1 flex-col bg-dark/50 ${!activeChat ? 'hidden md:flex' : 'flex'}`}>
         {!activeChat ? (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             Select a conversation to start messaging
@@ -114,8 +114,14 @@ const Messages = () => {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-border flex items-center justify-between glass">
+            <div className="p-4 border-b border-border flex items-center justify-between glass z-10 sticky top-0">
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setActiveChat(null)} 
+                  className="md:hidden p-1 -ml-2 text-gray-400 hover:text-white"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
                 <Avatar src={activeChat.participants.find(p => p._id !== user._id)?.profilePic} size="md" />
                 <div>
                   <p className="text-white font-bold">{activeChat.participants.find(p => p._id !== user._id)?.username}</p>
