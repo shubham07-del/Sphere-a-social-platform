@@ -1,21 +1,6 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
-// Force Node.js to resolve to IPv4 first. This prevents the ENETUNREACH error on Render
-// since Render's free tier has buggy IPv6 outbound routing.
-dns.setDefaultResultOrder('ipv4first');
-
-// Create reusable transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
-
 /**
  * Send an email with the OTP to the user.
  * @param {string} email - The user's email address.
@@ -29,6 +14,23 @@ const sendOTPEmail = async (email, otp) => {
     }
 
     try {
+        // 1. Manually resolve the IPv4 address of Gmail's SMTP server
+        // This is the absolute bulletproof fix for Render's IPv6 ENETUNREACH bug.
+        const { address } = await dns.promises.lookup('smtp.gmail.com', { family: 4 });
+
+        // 2. Create the transporter inside the function using the resolved IPv4 address
+        const transporter = nodemailer.createTransport({
+            host: address,
+            port: 465,
+            secure: true,
+            tls: {
+                servername: 'smtp.gmail.com', // Required so the SSL certificate doesn't fail on an IP address
+            },
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
         const mailOptions = {
             from: `"Antigravity Social" <${process.env.SMTP_USER}>`,
             to: email,
