@@ -1,19 +1,5 @@
-const nodemailer = require('nodemailer');
-const dns = require('dns');
-
-// Create reusable transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
-
 /**
- * Send an email with the OTP to the user.
+ * Send an email with the OTP to the user via Brevo REST API
  * @param {string} email - The user's email address.
  * @param {string} otp - The 6-digit OTP code.
  */
@@ -24,11 +10,25 @@ const sendOTPEmail = async (email, otp) => {
     }
 
     try {
-        const mailOptions = {
-            from: `"Antigravity Social" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: 'Password Reset Verification Code',
-            html: `
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.SMTP_PASS, // You stored the API Key here
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: "Antigravity Social",
+                    email: "shubhamlenka43@gmail.com" // Must be your verified Brevo email
+                },
+                to: [
+                    {
+                        email: email
+                    }
+                ],
+                subject: 'Password Reset Verification Code',
+                htmlContent: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
                     <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
                     <p style="color: #555; font-size: 16px;">Hello,</p>
@@ -39,15 +39,24 @@ const sendOTPEmail = async (email, otp) => {
                     <p style="color: #555; font-size: 16px;">This code will expire in 10 minutes.</p>
                     <p style="color: #555; font-size: 14px; margin-top: 30px;">If you didn't request a password reset, please ignore this email.</p>
                 </div>
-            `,
-        };
+                `
+            })
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        
+        // The response might be empty on success, so we safely handle it
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (e) {}
+
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP Error ${response.status}`);
+        }
+
         return true;
     } catch (error) {
         console.error('Error sending OTP email:', error);
-        throw new Error('Failed to send email');
+        throw new Error(error.message || 'Failed to send email');
     }
 };
 
