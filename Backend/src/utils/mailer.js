@@ -1,6 +1,17 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
+// Create reusable transporter object using SMTP transport
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: false,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
+
 /**
  * Send an email with the OTP to the user.
  * @param {string} email - The user's email address.
@@ -9,32 +20,10 @@ const dns = require('dns');
 const sendOTPEmail = async (email, otp) => {
     // Fallback for development if SMTP is not configured
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        // DEV MODE logs removed
         return true;
     }
 
     try {
-        // 1. Manually resolve the IPv4 address of Gmail's SMTP server
-        // This is the absolute bulletproof fix for Render's IPv6 ENETUNREACH bug.
-        const { address } = await dns.promises.lookup('smtp.gmail.com', { family: 4 });
-
-        // 2. Create the transporter inside the function using the resolved IPv4 address
-        const transporter = nodemailer.createTransport({
-            host: address,
-            port: 587,
-            secure: false, // Must be false for 587 (uses STARTTLS)
-            requireTLS: true,
-            tls: {
-                servername: 'smtp.gmail.com', // Required so the SSL certificate doesn't fail on an IP address
-            },
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-            connectionTimeout: 10000, // 10 seconds max wait
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-        });
         const mailOptions = {
             from: `"Antigravity Social" <${process.env.SMTP_USER}>`,
             to: email,
