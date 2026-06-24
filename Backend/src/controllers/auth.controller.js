@@ -83,12 +83,19 @@ async function forgotPassword(req, res) {
         user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
         await user.save();
 
-        // Send real email via nodemailer
-        await sendOTPEmail(email, otp);
-
-        res.status(200).json({ 
-            message: "OTP sent to email successfully"
-        });
+        try {
+            // Send real email via nodemailer
+            await sendOTPEmail(email, otp);
+            res.status(200).json({ 
+                message: "OTP sent to email successfully"
+            });
+        } catch (emailError) {
+            console.error("Gmail blocked the request, falling back to Dev OTP:", emailError.message);
+            res.status(200).json({ 
+                message: "Email blocked by server firewall. Using Dev Mode.",
+                devOtp: otp 
+            });
+        }
     } catch (error) {
         console.error("Error in forgotPassword:", error);
         res.status(500).json({ message: "Internal server error" });

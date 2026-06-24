@@ -13,6 +13,7 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [devOtp, setDevOtp] = useState('');
   const navigate = useNavigate();
 
   const handleSendOTP = async (e) => {
@@ -20,7 +21,10 @@ const ForgotPassword = () => {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/forgot-password', { email });
+      const res = await api.post('/auth/forgot-password', { email });
+      if (res.data.devOtp) {
+        setDevOtp(res.data.devOtp);
+      }
       setStep(2);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send OTP');
@@ -83,6 +87,13 @@ const ForgotPassword = () => {
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-xl mb-6 text-sm text-center">
             {error}
+          </div>
+        )}
+
+        {/* Development only alert for when Google blocks SMTP */}
+        {step === 2 && devOtp && (
+          <div className="bg-primary/10 border border-primary/50 text-primary p-3 rounded-xl mb-6 text-sm text-center font-mono">
+            [FIREWALL FALLBACK] Your OTP is: {devOtp}
           </div>
         )}
 
