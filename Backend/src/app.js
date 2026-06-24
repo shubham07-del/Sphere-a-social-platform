@@ -30,8 +30,8 @@ app.use("/api/saved", savedPostRouter)
 // Serve static frontend files from the 'public' folder
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Catch-all route for React Router: For any route not matching an API, send back index.html
-app.get('*', (req, res) => {
+// Catch-all route for React Router (Express 5 compatible)
+app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
