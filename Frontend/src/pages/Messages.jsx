@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Info, Image as ImageIcon, Smile, ChevronLeft } from 'lucide-react';
+import { Send, Phone, Video, Info, Image as ImageIcon, Smile, ChevronLeft, Trash2 } from 'lucide-react';
 import Avatar from '../components/ui/Avatar';
 import api from '../api/axios';
 import { io } from 'socket.io-client';
@@ -78,6 +78,16 @@ const Messages = () => {
     }
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      await api.delete(`/chat/messages/${messageId}`);
+      setMessages(messages.filter(m => m._id !== messageId));
+    } catch (error) {
+      console.error('Failed to delete message', error);
+      alert('Failed to delete message');
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-64px-64px)] md:h-screen -mx-4 md:-mx-8 overflow-hidden relative">
       {/* Sidebar - Conversation List */}
@@ -140,9 +150,28 @@ const Messages = () => {
               {messages.map(msg => {
                 const isMe = msg.sender === user._id;
                 return (
-                  <div key={msg._id} className={`flex flex-col max-w-[70%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
-                    <div className={`p-3 rounded-2xl ${isMe ? 'bg-gradient-to-r from-primary to-secondary text-white rounded-br-sm' : 'glass text-white rounded-bl-sm'}`}>
-                      {msg.text}
+                  <div key={msg._id} className={`flex flex-col max-w-[70%] group ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                    <div className="flex items-center gap-2">
+                      {isMe && (
+                        <button 
+                          onClick={() => handleDeleteMessage(msg._id)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-400 p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      <div className={`p-3 rounded-2xl ${isMe ? 'bg-gradient-to-r from-primary to-secondary text-white rounded-br-sm' : 'glass text-white rounded-bl-sm'}`}>
+                        {msg.text.includes('\\n') ? (
+                          msg.text.split('\\n').map((line, i) => (
+                            <React.Fragment key={i}>
+                              {line.startsWith('http') ? <img src={line} alt="Shared" className="w-48 rounded-lg my-1" /> : line}
+                              {i < msg.text.split('\\n').length - 1 && <br />}
+                            </React.Fragment>
+                          ))
+                        ) : (
+                          msg.text
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

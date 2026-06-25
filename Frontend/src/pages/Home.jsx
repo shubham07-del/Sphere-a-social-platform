@@ -21,7 +21,24 @@ const Home = () => {
           api.get('/stories/feed')
         ]);
         setPosts(postsRes.data);
-        setStories(storiesRes.data);
+        
+        // Group stories by user
+        const grouped = [];
+        const userMap = new Map();
+        
+        storiesRes.data.forEach(story => {
+          const userId = story.user._id;
+          if (!userMap.has(userId)) {
+            userMap.set(userId, {
+              user: story.user,
+              stories: []
+            });
+            grouped.push(userMap.get(userId));
+          }
+          userMap.get(userId).stories.push(story);
+        });
+        
+        setStories(grouped);
       } catch (error) {
         console.error("Failed to fetch feed:", error);
       } finally {
@@ -84,10 +101,10 @@ const Home = () => {
                 onChange={handleStoryUpload} 
               />
             </div>
-            {stories.map((story, index) => (
+            {stories.map((groupedStory, index) => (
               <StoryCard 
-                key={story._id} 
-                user={story.user} 
+                key={groupedStory.user._id} 
+                user={groupedStory.user} 
                 onClick={() => setActiveStoryIndex(index)}
               />
             ))}

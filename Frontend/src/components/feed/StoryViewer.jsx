@@ -4,10 +4,12 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 
 const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [userIndex, setUserIndex] = useState(initialIndex);
+  const [storyIndex, setStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  const currentStory = stories[currentIndex];
+  const currentUserGroup = stories[userIndex];
+  const currentStory = currentUserGroup?.stories[storyIndex];
 
   useEffect(() => {
     // Reset progress when story changes
@@ -29,19 +31,26 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [currentIndex, stories.length]);
+  }, [userIndex, storyIndex, stories.length]);
 
   const handleNext = () => {
-    if (currentIndex < stories.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+    if (storyIndex < currentUserGroup.stories.length - 1) {
+      setStoryIndex(prev => prev + 1);
+    } else if (userIndex < stories.length - 1) {
+      setUserIndex(prev => prev + 1);
+      setStoryIndex(0);
     } else {
-      onClose(); // Close if it's the last story
+      onClose(); // Close if it's the very last story
     }
   };
 
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+    if (storyIndex > 0) {
+      setStoryIndex(prev => prev - 1);
+      setProgress(0);
+    } else if (userIndex > 0) {
+      setUserIndex(prev => prev - 1);
+      setStoryIndex(stories[userIndex - 1].stories.length - 1);
       setProgress(0);
     } else {
       // If first story and tapping left, restart it
@@ -58,13 +67,13 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
         
         {/* Progress Bars */}
         <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2 pt-4 px-3 bg-gradient-to-b from-black/60 to-transparent">
-          {stories.map((_, idx) => (
+          {currentUserGroup?.stories.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-white transition-all duration-75 ease-linear"
                 style={{ 
-                  width: idx === currentIndex ? `${progress}%` : 
-                         idx < currentIndex ? '100%' : '0%' 
+                  width: idx === storyIndex ? `${progress}%` : 
+                         idx < storyIndex ? '100%' : '0%' 
                 }}
               />
             </div>
@@ -74,9 +83,9 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
         {/* Header */}
         <div className="absolute top-6 left-0 right-0 z-20 flex justify-between items-center px-4">
           <div className="flex items-center gap-3">
-            <Avatar src={currentStory.user?.profilePic} size="sm" />
+            <Avatar src={currentUserGroup.user?.profilePic} size="sm" />
             <span className="text-white font-bold text-sm drop-shadow-md">
-              {currentStory.user?.username}
+              {currentUserGroup.user?.username}
             </span>
             <span className="text-white/70 text-xs drop-shadow-md">
               {new Date(currentStory.createdAt).getHours()}h
