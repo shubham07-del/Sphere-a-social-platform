@@ -1,13 +1,19 @@
 const userModel = require("../models/user.model");
+const followerModel = require("../models/follower.model");
 
 // Get user profile by ID
 const getProfile = async (req, res) => {
     try {
-        const user = await userModel.findById(req.params.id).select("-password");
+        const user = await userModel.findById(req.params.id).select("-password").lean();
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json(user);
+
+        // Fetch precise follower and following counts from followerModel
+        const followersCount = await followerModel.countDocuments({ user: req.params.id });
+        const followingCount = await followerModel.countDocuments({ follower: req.params.id });
+
+        res.status(200).json({ ...user, followersCount, followingCount });
     } catch (error) {
         console.error("Error in getProfile:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -39,14 +45,21 @@ const updateProfile = async (req, res) => {
 const searchUsers = async (req, res) => {
     try {
         const { query } = req.query;
-        if (!query) return res.status(400).json({ message: "Query is required" });
+        let searchCriteria = {};
 
-        const users = await userModel.find({
-            $or: [
-                { username: { $regex: query, $options: "i" } },
-                { name: { $regex: query, $options: "i" } }
-            ]
-        }).select("username name profilePic");
+        if (query) {
+            searchCriteria = {
+                $or: [
+                    { username: { $regex: query, $options: "i" } },
+                    { name: { $regex: query, $options: "i" } }
+                ]
+            };
+        }
+
+        // Limit to 20 users so we don't overload the frontend
+        const users = await userModel.find(searchCriteria)
+            .limit(20)
+            .select("username name profilePic");
 
         res.status(200).json(users);
     } catch (error) {

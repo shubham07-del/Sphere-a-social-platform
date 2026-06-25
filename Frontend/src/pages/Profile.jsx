@@ -146,11 +146,11 @@ const Profile = () => {
             <span className="text-gray-400 text-sm">Posts</span>
           </div>
           <div className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80">
-            <span className="block font-bold text-white text-xl">{profile.followers?.length || 0}</span>
+            <span className="block font-bold text-white text-xl">{profile.followersCount || 0}</span>
             <span className="text-gray-400 text-sm">Followers</span>
           </div>
           <div className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80">
-            <span className="block font-bold text-white text-xl">{profile.following?.length || 0}</span>
+            <span className="block font-bold text-white text-xl">{profile.followingCount || 0}</span>
             <span className="text-gray-400 text-sm">Following</span>
           </div>
         </div>

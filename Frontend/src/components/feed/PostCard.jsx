@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, X } from 'lucide-react';
 import Avatar from '../ui/Avatar';
-import Input from '../ui/Input';
+import ShareModal from './ShareModal';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 
 const PostCard = ({ post }) => {
@@ -10,6 +11,8 @@ const PostCard = ({ post }) => {
   const [isSaved, setIsSaved] = useState(post.isSaved);
   const [showHeart, setShowHeart] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const navigate = useNavigate();
   
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [comments, setComments] = useState([]);
@@ -99,7 +102,10 @@ const PostCard = ({ post }) => {
     <div className="glass rounded-2xl mb-6 overflow-hidden">
       {/* Post Header */}
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3 cursor-pointer">
+        <div 
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate(`/profile/${post.user?._id}`)}
+        >
           <Avatar src={post.user?.profilePic} size="md" />
           <div>
             <h3 className="font-semibold text-white">{post.user?.username}</h3>
@@ -152,7 +158,10 @@ const PostCard = ({ post }) => {
             <button className="text-white hover:text-gray-300 transition-colors">
               <MessageCircle className="w-7 h-7" />
             </button>
-            <button className="text-white hover:text-gray-300 transition-colors">
+            <button 
+              onClick={() => setIsShareOpen(true)}
+              className="text-white hover:text-gray-300 transition-colors"
+            >
               <Send className="w-7 h-7" />
             </button>
           </div>
@@ -169,7 +178,12 @@ const PostCard = ({ post }) => {
 
         {/* Caption */}
         <p className="text-white mb-2">
-          <span className="font-semibold mr-2">{post.user?.username}</span>
+          <span 
+            className="font-semibold mr-2 cursor-pointer hover:underline"
+            onClick={() => navigate(`/profile/${post.user?._id}`)}
+          >
+            {post.user?.username}
+          </span>
           {post.caption}
         </p>
 
@@ -250,6 +264,13 @@ const PostCard = ({ post }) => {
               </form>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {isShareOpen && (
+          <ShareModal post={post} onClose={() => setIsShareOpen(false)} />
         )}
       </AnimatePresence>
 

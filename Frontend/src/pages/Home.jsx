@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StoryCard from '../components/feed/StoryCard';
+import StoryViewer from '../components/feed/StoryViewer';
 import PostCard from '../components/feed/PostCard';
 import PageWrapper from '../components/layout/PageWrapper';
 import api from '../api/axios';
@@ -9,6 +10,7 @@ const Home = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingStory, setUploadingStory] = useState(false);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const storyInputRef = useRef(null);
 
   useEffect(() => {
@@ -82,8 +84,12 @@ const Home = () => {
                 onChange={handleStoryUpload} 
               />
             </div>
-            {stories.map(story => (
-              <StoryCard key={story._id} user={story.user} />
+            {stories.map((story, index) => (
+              <StoryCard 
+                key={story._id} 
+                user={story.user} 
+                onClick={() => setActiveStoryIndex(index)}
+              />
             ))}
           </div>
         </div>
@@ -96,6 +102,15 @@ const Home = () => {
         </div>
         
       </div>
+
+      {/* Story Viewer Overlay */}
+      {activeStoryIndex !== null && (
+        <StoryViewer 
+          stories={stories}
+          initialIndex={activeStoryIndex}
+          onClose={() => setActiveStoryIndex(null)}
+        />
+      )}
     </PageWrapper>
   );
 };
