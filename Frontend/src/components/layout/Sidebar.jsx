@@ -17,7 +17,7 @@ const Sidebar = () => {
   return (
     <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 border-r border-border glass z-50">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-gradient mb-8 tracking-tighter">PremiumApp</h1>
+        <h1 className="text-4xl font-insta font-normal text-gradient mb-8 tracking-tighter">Sphere</h1>
         
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => (

@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Avatar from '../components/ui/Avatar';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import UserListModal from '../components/profile/UserListModal';
 import api from '../api/axios';
 
 const Profile = () => {
@@ -20,6 +21,10 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({ name: '', bio: '', website: '' });
   const [editFile, setEditFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Modal State
+  const [showListModal, setShowListModal] = useState(null); // 'followers' or 'followings'
+  const [listData, setListData] = useState([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -94,6 +99,19 @@ const Profile = () => {
     }
   };
 
+  const handleShowList = async (type) => {
+    try {
+      const targetId = id || profile._id;
+      const res = await api.get(`/follow/${type}/${targetId}`);
+      // The API returns an array of follower objects { follower: {...user} } OR following objects { user: {...user} }
+      const users = res.data.map(item => type === 'followers' ? item.follower : item.user);
+      setListData(users);
+      setShowListModal(type);
+    } catch (error) {
+      console.error(`Failed to fetch ${type}`, error);
+    }
+  };
+
   if (loading || !profile) return <div className="text-white text-center pt-20">Loading profile...</div>;
 
   return (
@@ -145,11 +163,17 @@ const Profile = () => {
             <span className="block font-bold text-white text-xl">{posts.length}</span>
             <span className="text-gray-400 text-sm">Posts</span>
           </div>
-          <div className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80">
+          <div 
+            className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80"
+            onClick={() => handleShowList('followers')}
+          >
             <span className="block font-bold text-white text-xl">{profile.followersCount || 0}</span>
             <span className="text-gray-400 text-sm">Followers</span>
           </div>
-          <div className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80">
+          <div 
+            className="text-center flex-1 md:flex-none cursor-pointer hover:opacity-80"
+            onClick={() => handleShowList('followings')}
+          >
             <span className="block font-bold text-white text-xl">{profile.followingCount || 0}</span>
             <span className="text-gray-400 text-sm">Following</span>
           </div>
@@ -265,6 +289,17 @@ const Profile = () => {
               </form>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Followers / Following List Modal */}
+      <AnimatePresence>
+        {showListModal && (
+          <UserListModal 
+            title={showListModal === 'followers' ? 'Followers' : 'Following'}
+            users={listData}
+            onClose={() => setShowListModal(null)}
+          />
         )}
       </AnimatePresence>
 

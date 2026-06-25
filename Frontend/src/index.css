@@ -1,6 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Grand+Hotel&display=swap');
 @import "tailwindcss";
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
   --color-primary: #aa3bff;
@@ -12,6 +11,7 @@
   --color-card-hover: rgba(255, 255, 255, 0.08);
   --color-border: rgba(255, 255, 255, 0.1);
   --font-inter: "Inter", sans-serif;
+  --font-insta: "Grand Hotel", cursive;
 }
 
 @layer base {

@@ -7,8 +7,8 @@ const router = express.Router();
 router.post("/request/:targetUserId", verifyJWT, sendFollowRequest);
 router.post("/accept/:requestId", verifyJWT, acceptFollowRequest);
 router.post("/reject/:requestId", verifyJWT, rejectFollowRequest);
-router.get("/followers", verifyJWT, getFollowers);
-router.get("/followings", verifyJWT, getFollowings);
+router.get("/followers/:id?", verifyJWT, getFollowers);
+router.get("/followings/:id?", verifyJWT, getFollowings);
 router.get("/pending", verifyJWT, getPendingRequests);
 
 module.exports = router;

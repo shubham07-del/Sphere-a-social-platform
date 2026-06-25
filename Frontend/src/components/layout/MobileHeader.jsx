@@ -9,7 +9,7 @@ const MobileHeader = () => {
   return (
     <div className="md:hidden fixed top-0 left-0 w-full h-16 glass border-b border-border z-50 flex items-center justify-between px-4">
       {/* Logo */}
-      <NavLink to="/" className="text-2xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+      <NavLink to="/" className="text-3xl font-insta font-normal tracking-wide text-white bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
         Sphere
       </NavLink>
 

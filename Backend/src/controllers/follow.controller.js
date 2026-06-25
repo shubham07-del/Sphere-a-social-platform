@@ -82,7 +82,8 @@ const rejectFollowRequest = async (req, res) => {
 // Get Followers
 const getFollowers = async (req, res) => {
     try {
-        const followers = await followerModel.find({ user: req.user._id }).populate("follower", "username profilePic");
+        const targetId = req.params.id || req.user._id;
+        const followers = await followerModel.find({ user: targetId }).populate("follower", "username name profilePic");
         res.status(200).json(followers);
     } catch (error) {
         console.error("Error in getFollowers:", error);
@@ -93,7 +94,8 @@ const getFollowers = async (req, res) => {
 // Get Followings
 const getFollowings = async (req, res) => {
     try {
-        const followings = await followerModel.find({ follower: req.user._id }).populate("user", "username profilePic");
+        const targetId = req.params.id || req.user._id;
+        const followings = await followerModel.find({ follower: targetId }).populate("user", "username name profilePic");
         res.status(200).json(followings);
     } catch (error) {
         console.error("Error in getFollowings:", error);
