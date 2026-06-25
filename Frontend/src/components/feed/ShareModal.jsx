@@ -63,7 +63,7 @@ const ShareModal = ({ post, onClose }) => {
         
         // 2. Send the message containing the post image link and caption
         const messageText = `Shared a post:\\n${post.image}\\n${post.caption || ''}`;
-        await api.post(`/chat/message/${conversationId}`, { text: messageText });
+        await api.post(`/chat/messages/${conversationId}`, { text: messageText });
       });
 
       await Promise.all(sendPromises);
