@@ -13,7 +13,14 @@ const getProfile = async (req, res) => {
         const followersCount = await followerModel.countDocuments({ user: req.params.id });
         const followingCount = await followerModel.countDocuments({ follower: req.params.id });
 
-        res.status(200).json({ ...user, followersCount, followingCount });
+        // Check if current user is following this profile
+        let isFollowing = false;
+        if (req.params.id !== req.user._id.toString()) {
+            const followDoc = await followerModel.findOne({ user: req.params.id, follower: req.user._id });
+            isFollowing = !!followDoc;
+        }
+
+        res.status(200).json({ ...user, followersCount, followingCount, isFollowing });
     } catch (error) {
         console.error("Error in getProfile:", error);
         res.status(500).json({ message: "Internal server error" });

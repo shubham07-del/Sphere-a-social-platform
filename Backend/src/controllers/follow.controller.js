@@ -79,6 +79,21 @@ const rejectFollowRequest = async (req, res) => {
     }
 };
 
+// Unfollow User
+const unfollowUser = async (req, res) => {
+    try {
+        const { targetUserId } = req.params;
+        const followerId = req.user._id;
+
+        await followerModel.findOneAndDelete({ user: targetUserId, follower: followerId });
+
+        res.status(200).json({ message: "Unfollowed successfully" });
+    } catch (error) {
+        console.error("Error in unfollowUser:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 // Get Followers
 const getFollowers = async (req, res) => {
     try {
@@ -115,4 +130,4 @@ const getPendingRequests = async (req, res) => {
     }
 };
 
-module.exports = { sendFollowRequest, acceptFollowRequest, rejectFollowRequest, getFollowers, getFollowings, getPendingRequests };
+module.exports = { sendFollowRequest, acceptFollowRequest, rejectFollowRequest, unfollowUser, getFollowers, getFollowings, getPendingRequests };

@@ -17,6 +17,7 @@ const Profile = () => {
   const [savedPosts, setSavedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMe, setIsMe] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', bio: '', website: '' });
   const [editFile, setEditFile] = useState(null);
@@ -44,6 +45,7 @@ const Profile = () => {
         ]);
         
         setProfile(profileRes.data);
+        setIsFollowing(profileRes.data.isFollowing || false);
         setEditForm({
           name: profileRes.data.name || '',
           bio: profileRes.data.bio || '',
@@ -76,6 +78,17 @@ const Profile = () => {
     } catch (error) {
       console.error("Failed to send follow request", error);
       alert(error.response?.data?.message || "Failed to follow");
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      await api.post(`/follow/unfollow/${profile._id}`);
+      setIsFollowing(false);
+      setProfile(prev => ({ ...prev, followersCount: Math.max(0, prev.followersCount - 1) }));
+    } catch (error) {
+      console.error("Failed to unfollow", error);
+      alert("Failed to unfollow");
     }
   };
 
@@ -137,7 +150,11 @@ const Profile = () => {
               </>
             ) : (
               <>
-                <Button variant="primary" onClick={handleFollow}>Follow</Button>
+                {isFollowing ? (
+                  <Button variant="secondary" onClick={handleUnfollow}>Unfollow</Button>
+                ) : (
+                  <Button variant="primary" onClick={handleFollow}>Follow</Button>
+                )}
                 <Button variant="secondary" onClick={handleMessage}>
                   <Send className="w-5 h-5 mr-2" /> Message
                 </Button>
