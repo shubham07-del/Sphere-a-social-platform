@@ -27,12 +27,6 @@ app.use("/api/notifications", notificationRouter)
 app.use("/api/chat", chatRouter)
 app.use("/api/saved", savedPostRouter)
 
-// Serve static frontend files from the 'public' folder
-app.use(express.static(path.join(__dirname, '../public')));
-
-// Catch-all route for React Router (Express 5 compatible)
-app.get(/(.*)/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+// No need to serve static frontend files since they are on Vercel
 
 module.exports = app

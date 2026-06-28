@@ -15,7 +15,8 @@ const Messages = () => {
 
   useEffect(() => {
     // Connect Socket
-    socketRef.current = io('http://localhost:3000');
+    const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://sphere-a-social-platform-1.onrender.com';
+    socketRef.current = io(BACKEND_URL);
     if (user) {
       socketRef.current.emit('join_user_room', user._id);
     }

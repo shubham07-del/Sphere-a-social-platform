@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // Create a custom axios instance
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://sphere-a-social-platform-1.onrender.com';
 const api = axios.create({
-  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:3000/api', // Uses relative path in production, absolute path in development
+  baseURL: `${BACKEND_URL}/api`,
 });
 
 // Add a request interceptor to automatically attach the token
